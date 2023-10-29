@@ -4,7 +4,7 @@ import memegenerator
 import random
 
 TOKEN = 'MTE2NzQxNjI2NzIyNTk3Mjc4Ng.G_8k0i.cV8DYV-e_DRH9vo2IO4Zw6oXg-YR7pwjJUaTMA'
-MY_GUILD = discord.Object(id=985071500484833300)
+MY_GUILD = discord.Object(id=880925303332012093)
 
 class Bot(discord.Client):
     def __init__(self, *, intents: discord.Intents):

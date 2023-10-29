@@ -1,32 +1,19 @@
-import requests
 import requests as rq
 from bs4 import BeautifulSoup as bs
-from slimit import ast
-from slimit.parser import Parser
-from slimit.visitors import nodevisitor
 
-
-data = {}
-
-# for i in range(1, 100):  # max is 6341
-#     url = f'https://memeshappen.com/makeameme/{i}'
-#     temp = rq.get(url)
-#     soup = bs(temp.text, 'html.parser')
-#     scripts = soup.find_all('script')
-#     if scripts:
-#         im = scripts[3].text.split(',')
-#         image_name = im[40][5:-2]
-#         data[i] = image_name
-#         image = requests.get('https://s3.memeshappen.com/templates/' + image_name).content
-#         with open(f'hmeme/{image_name}', 'wb') as handler:
-#             handler.write(image)
-
-url = f'https://memeshappen.com/makeameme/1'
-temp = rq.get(url)
-soup = bs(temp.text, 'html.parser')
-scripts = soup.find_all('script')
-if scripts:
-    im = scripts[3]
-    parser = Parser()
-    tree = parser.parse(im)
-    print(tree)
+for i in range(1, 6341):  # max is 6341
+    url = f'https://memeshappen.com/makeameme/{i}'
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36'}
+    temp = rq.get(url, headers=headers)
+    soup = bs(temp.text, 'html.parser')
+    scripts = soup.find_all('meta')
+    if len(scripts) > 9:
+        image_url = scripts[9]['content']
+        image = rq.get(image_url).content
+        try:
+            with open(f'hmeme/{i} - {image_url[37:]}', 'wb') as handler:
+                handler.write(image)
+        except OSError:
+            print("Ahmed is retarded")
+        else:
+            print(f'ID: {i} found!')
