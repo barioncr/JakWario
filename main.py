@@ -3,19 +3,20 @@ from discord import app_commands
 import memegenerator
 from numpy import random
 
-MY_GUILD = discord.Object(id=880925303332012093)
 playlist: list[str] = []
 
 ffmpegexe = "ffmpeg-6.1-full_build/bin/ffmpeg.exe"
+
 
 class Bot(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
+        self.guild = discord.Object(id=int(input("GUILD: ")))
 
     async def setup_hook(self):
-        self.tree.copy_global_to(guild=MY_GUILD)
-        await self.tree.sync(guild=MY_GUILD)
+        self.tree.copy_global_to(guild=self.guild)
+        await self.tree.sync(guild=self.guild)
 
 
 bot_intents = discord.Intents.default()
@@ -141,5 +142,4 @@ async def leave(interaction: discord.Interaction):
 
 
 if __name__ == '__main__':
-    with open('_bot_token') as TOKEN:
-        client.run(TOKEN.readline())
+    client.run(input("TOKEN: "))
