@@ -1,4 +1,6 @@
 import os
+from math import sqrt
+
 import numpy as np
 from numpy import random
 import textwrap
@@ -22,9 +24,6 @@ def fit_to_bounding_box(text, target, font_family):
     return font_size, text_dimensions
 
 
-# def wrap_text(text, width):
-
-
 def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
     wrap_width = 60
     # load meme shappen watermark
@@ -33,7 +32,7 @@ def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
     try:
         memefile = random.choice(os.listdir(meme_dir))
         print(f'Using {memefile} as a template')
-        template = Image.open(meme_dir + '/' + memefile)
+        template = Image.open(meme_dir + '/' + memefile).convert('RGB')
     except Exception as e:
         print(e)
         template = Image.open('hmeme' + '/' + '2717 - 20151115_223544.jpg')
@@ -90,6 +89,33 @@ def split_text(text: str, text_box_count: int) -> list:
     return substrings
 
 
+def make_skeleton(image, text_boxes, captions: str):
+    fonts = os.listdir('_bafonts')
+    colors = tuple(ImageColor.colormap.keys())
+
+    skeleton_image = Image.open(image)
+    canvas = ImageDraw.Draw(skeleton_image)
+
+    captions = split_text(captions, len(text_boxes))
+
+    for bar, box in zip(captions, text_boxes):
+        font_family = '_bafonts/' + random.choice(fonts)
+
+        bounds = np.sqrt((box[2] - box[0]) * (box[3] - box[1]) // len(bar))
+
+        wrap_width = max(bounds, 5)
+        bar = textwrap.fill(bar, wrap_width)
+        font_size, bb = fit_to_bounding_box(bar, (box[2] - box[0], box[3] - box[1]), font_family)
+        canvas.text(
+            (box[0], box[1]), bar, font=ImageFont.truetype(font_family, size=font_size),
+            fill=random.choice(colors), stroke_fill=random.choice(colors), stroke_width=2,
+            align='center'
+        )
+
+    skeleton_image.save("skeletal.png")
+    skeleton_image.close()
+
+
 class SkeletonTemplate:
     fonts = os.listdir('_bafonts')
     colors_1 = list(ImageColor.colormap.keys())
@@ -107,7 +133,11 @@ class SkeletonTemplate:
         for bar, box in zip(captions, self.text_boxes):
             font_family = '_bafonts/' + random.choice(self.fonts)
 
-            wrap_width = max(len(bar) // 4, 4)
+            symbol_width = int((((box[2] - box[0]) * (box[3] - box[1])) // len(bar) // 2) ** 0.5)
+            lines_count = (box[3] - box[1]) // (symbol_width * 2)
+
+            print(symbol_width)
+            wrap_width = max(len(bar) // lines_count, 5)
             bar = textwrap.fill(bar, wrap_width)
 
             font_size, bb = fit_to_bounding_box(bar, (box[2] - box[0], box[3] - box[1]), font_family)
@@ -143,4 +173,3 @@ skele_05 = SkeletonTemplate(
 
 skeletons = (skele_03, skele_05)
 
-print()

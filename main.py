@@ -3,9 +3,10 @@ from discord import app_commands
 import memegenerator
 from numpy import random
 
-
 MY_GUILD = discord.Object(id=880925303332012093)
+playlist: list[str] = []
 
+ffmpegexe = "ffmpeg-6.1-full_build/bin/ffmpeg.exe"
 
 class Bot(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -20,6 +21,16 @@ class Bot(discord.Client):
 bot_intents = discord.Intents.default()
 bot_intents.message_content = True
 client = Bot(intents=bot_intents)
+
+
+async def play_song(interaction: discord.Interaction, vc):
+    await interaction.response.send_message(
+        content=f"Playing {playlist[0]} in {interaction.user.voice.channel.name} to annoy everyone")
+    vc.play(
+        discord.FFmpegPCMAudio(executable="ffmpeg-6.1-full_build/bin/ffmpeg.exe",
+                               source=f'music_playlist/{playlist[0]}'
+                               )
+    )
 
 
 @client.event
@@ -95,11 +106,36 @@ async def join(interaction: discord.Interaction):
         await interaction.response.send_message(f'{interaction.user.name} is a fake friend (not in voice)')
 
 
+@client.tree.command(name='add_song')
+async def add_song(interaction: discord.Interaction, song: discord.Attachment):
+    await song.save(f'music_playlist/{song.filename}')
+    playlist.append(song.filename)
+    await interaction.response.send_message(f"Added {playlist[0]} to playlist.")
+
+
+@client.tree.command(name='play')
+async def play(interaction: discord.Interaction):
+    channel = interaction.user.voice.channel
+    if not interaction.guild.voice_client:
+        vc = await channel.connect()
+    else:
+        vc = interaction.guild.voice_client
+
+    await interaction.response.send_message(
+        content=f"Playing {playlist[0]} in {channel.name} to annoy everyone"
+    )
+    vc.play(
+        discord.FFmpegPCMAudio(executable=ffmpegexe,
+                               source=f'music_playlist/{playlist.pop(0)}'
+                               )
+    )
+
+
 @client.tree.command()
 async def leave(interaction: discord.Interaction):
-    if client.voice_clients:
-        await client.voice_clients[0].disconnect()
-        await interaction.response.send_message(f'Leaving {client.voice_clients[0].channel}')
+    if interaction.guild.voice_client:
+        await interaction.guild.voice_client.disconnect(force=True)
+        await interaction.response.send_message(f'Leaving {interaction.guild.voice_client.channel}')
     else:
         await interaction.response.send_message("I'm not in a voice channel")
 
