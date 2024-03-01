@@ -19,11 +19,6 @@ class Bot(discord.Client):
         await self.tree.sync(guild=self.guild)
 
 
-bot_intents = discord.Intents.default()
-bot_intents.message_content = True
-client = Bot(intents=bot_intents)
-
-
 async def play_song(interaction: discord.Interaction, vc):
     await interaction.response.send_message(
         content=f"Playing {playlist[0]} in {interaction.user.voice.channel.name} to annoy everyone")
@@ -36,7 +31,7 @@ async def play_song(interaction: discord.Interaction, vc):
 
 @client.event
 async def on_ready():
-    print(f'{client.user} подключился!')
+    print(f'{client.user} is alive!')
 
 
 # game_start = False
@@ -142,4 +137,8 @@ async def leave(interaction: discord.Interaction):
 
 
 if __name__ == '__main__':
+
+    bot_intents = discord.Intents.default()
+    bot_intents.message_content = True
+    client = Bot(intents=bot_intents)
     client.run(input("TOKEN: "))
