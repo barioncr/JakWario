@@ -1,11 +1,10 @@
 import discord
 from discord import app_commands
 import memegenerator
-from numpy import random
+import random
 
 playlist: list[str] = []
 
-ffmpegexe = "ffmpeg-6.1-full_build/bin/ffmpeg.exe"
 
 
 class Bot(discord.Client):
@@ -17,6 +16,11 @@ class Bot(discord.Client):
     async def setup_hook(self):
         self.tree.copy_global_to(guild=self.guild)
         await self.tree.sync(guild=self.guild)
+
+
+bot_intents = discord.Intents.default()
+bot_intents.message_content = True
+client = Bot(intents=bot_intents)
 
 
 async def play_song(interaction: discord.Interaction, vc):
@@ -35,14 +39,6 @@ async def on_ready():
 
 
 # game_start = False
-
-@client.tree.command()
-async def hangman(interaction: discord.Interaction, start: bool, letter: str):
-    if start:
-        await interaction.response.send_message(f'Hi, {interaction.user.mention}')
-        word = random.choice(hangman.words)
-    else:
-        result, attempts = hangman.check(word, letter)
 
 
 @client.tree.command(name='ememe', description='A meme using random submitted template.')
@@ -109,22 +105,7 @@ async def add_song(interaction: discord.Interaction, song: discord.Attachment):
     await interaction.response.send_message(f"Added {playlist[0]} to playlist.")
 
 
-@client.tree.command(name='play')
-async def play(interaction: discord.Interaction):
-    channel = interaction.user.voice.channel
-    if not interaction.guild.voice_client:
-        vc = await channel.connect()
-    else:
-        vc = interaction.guild.voice_client
 
-    await interaction.response.send_message(
-        content=f"Playing {playlist[0]} in {channel.name} to annoy everyone"
-    )
-    vc.play(
-        discord.FFmpegPCMAudio(executable=ffmpegexe,
-                               source=f'music_playlist/{playlist.pop(0)}'
-                               )
-    )
 
 
 @client.tree.command()
@@ -137,8 +118,4 @@ async def leave(interaction: discord.Interaction):
 
 
 if __name__ == '__main__':
-
-    bot_intents = discord.Intents.default()
-    bot_intents.message_content = True
-    client = Bot(intents=bot_intents)
     client.run(input("TOKEN: "))

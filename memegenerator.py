@@ -1,10 +1,14 @@
 import os
-from math import sqrt
-
-import numpy as np
-from numpy import random
+import random
 import textwrap
 from PIL import Image, ImageDraw, ImageFont, ImageColor
+
+
+def clip(data, d_min, d_max):
+    if data > d_max:
+        return d_max
+    elif data < d_min:
+        return d_min
 
 
 def fit_to_bounding_box(text, target, font_family):
@@ -43,15 +47,15 @@ def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
     # wrap top or bottom text if necessary
     if len(top_text) > wrap_width:
         top_text = textwrap.fill(top_text, width=wrap_width)
-        font_size_top = np.clip((w * 2) // (wrap_width + 5), h * 0.01, h * 0.2)
+        font_size_top = clip((w * 2) // (wrap_width + 5), h * 0.01, h * 0.2)
     else:
-        font_size_top = np.clip((w * 2) // (len(top_text) + 5), h * 0.01, h * 0.2)
+        font_size_top = clip((w * 2) // (len(top_text) + 5), h * 0.01, h * 0.2)
 
     if len(bottom_text) > wrap_width:
         bottom_text = textwrap.fill(bottom_text, width=wrap_width)
-        font_size_bot = np.clip((w * 2) // (wrap_width + 1), h * 0.01, h * 0.2)
+        font_size_bot = clip((w * 2) // (wrap_width + 1), h * 0.01, h * 0.2)
     else:
-        font_size_bot = np.clip((w * 2) // (len(bottom_text) + 5), h * 0.01, h * 0.2)
+        font_size_bot = clip((w * 2) // (len(bottom_text) + 5), h * 0.01, h * 0.2)
 
     # loading fonts
     font_top = ImageFont.truetype('impact.ttf', size=font_size_top)
@@ -101,7 +105,7 @@ def make_skeleton(image, text_boxes, captions: str):
     for bar, box in zip(captions, text_boxes):
         font_family = '_bafonts/' + random.choice(fonts)
 
-        bounds = np.sqrt((box[2] - box[0]) * (box[3] - box[1]) // len(bar))
+        bounds = ((box[2] - box[0]) * (box[3] - box[1]) // len(bar)) ** 0.5
 
         wrap_width = max(bounds, 5)
         bar = textwrap.fill(bar, wrap_width)
@@ -172,4 +176,3 @@ skele_05 = SkeletonTemplate(
 )
 
 skeletons = (skele_03, skele_05)
-
