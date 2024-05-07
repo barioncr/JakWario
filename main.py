@@ -1,10 +1,13 @@
+import random
+from pathlib import Path
+
 import discord
 from discord import app_commands
+
 import memegenerator
-import random
 
 playlist: list[str] = []
-
+ROOT = Path(sys.argv[0]).parent
 
 
 class Bot(discord.Client):
@@ -44,14 +47,14 @@ async def on_ready():
 @client.tree.command(name='ememe', description='A meme using random submitted template.')
 async def ememe(interaction: discord.Interaction, top_text: str = '', bottom_text: str = ''):
     memegenerator.make_meme(top_text, bottom_text, 'ememe')
-    send_ememe = discord.File(fp='tempememe.png')
+    send_ememe = discord.File(fp=ROOT / 'tempememe.png')
     await interaction.response.send_message(file=send_ememe)
 
 
 @client.tree.command(name='hmeme', description='A meme using random memeshappen template.')
 async def hmeme(interaction: discord.Interaction, top_text: str = '', bottom_text: str = ''):
     memegenerator.make_meme(top_text, bottom_text, 'hmeme')
-    send_hmeme = discord.File(fp='tempememe.png')
+    send_hmeme = discord.File(fp=ROOT / 'tempememe.png')
     await interaction.response.send_message(file=send_hmeme)
 
 
@@ -59,7 +62,7 @@ async def hmeme(interaction: discord.Interaction, top_text: str = '', bottom_tex
 async def skele(interaction: discord.Interaction, message: str):
     meme = random.choice(memegenerator.skeletons)
     meme.add_captions(message)
-    await interaction.response.send_message(file=discord.File(fp='skeletal.png'))
+    await interaction.response.send_message(file=discord.File(fp=ROOT / 'skeletal.png'))
 
 
 @client.tree.command(name='submit',
@@ -69,7 +72,7 @@ async def submit(interaction: discord.Interaction, submission: discord.Attachmen
     chk = submission.filename[submission.filename.index('.') + 1:].lower()
     if chk in allowed:
         fname = f'{random.randint(0, 99999)} - {submission.filename}'
-        await submission.save(f'ememe/{fname}')
+        await submission.save(ROOT / 'ememe' / fname)
         await interaction.response.send_message(f'Submitted `{fname}` to ememe (stands for Epic Meme)!')
     else:
         await interaction.response.send_message(
@@ -79,7 +82,7 @@ async def submit(interaction: discord.Interaction, submission: discord.Attachmen
 
 @client.tree.command()
 async def viper(interaction: discord.Interaction):
-    vipa = discord.File(fp='viper/' + f'({random.randint(1, 905)}).jpg')
+    vipa = discord.File(fp=ROOT / 'viper' / f'({random.randint(1, 905)}).jpg')
     await interaction.response.send_message(file=vipa)
 
 
@@ -103,9 +106,6 @@ async def add_song(interaction: discord.Interaction, song: discord.Attachment):
     await song.save(f'music_playlist/{song.filename}')
     playlist.append(song.filename)
     await interaction.response.send_message(f"Added {playlist[0]} to playlist.")
-
-
-
 
 
 @client.tree.command()

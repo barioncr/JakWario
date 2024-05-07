@@ -1,7 +1,11 @@
 import os
 import random
+import sys
 import textwrap
 from PIL import Image, ImageDraw, ImageFont, ImageColor
+
+from pathlib import Path
+ROOT = Path(sys.argv[0]).parent
 
 
 def clip(data, d_min, d_max):
@@ -34,12 +38,12 @@ def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
     watermark = Image.open('MemesHappen.png')
     # load template from folder
     try:
-        memefile = random.choice(os.listdir(meme_dir))
+        memefile = random.choice(os.listdir(ROOT / meme_dir))
         print(f'Using {memefile} as a template')
-        template = Image.open(meme_dir + '/' + memefile).convert('RGB')
+        template = Image.open(ROOT / meme_dir / memefile).convert('RGB')
     except Exception as e:
         print(e)
-        template = Image.open('hmeme' + '/' + '2717 - 20151115_223544.jpg')
+        template = Image.open(ROOT / 'hmeme' / '2717 - 20151115_223544.jpg')
 
     # get width and height of the template
     w, h = template.size
@@ -58,8 +62,8 @@ def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
         font_size_bot = clip((w * 2) // (len(bottom_text) + 5), h * 0.01, h * 0.2)
 
     # loading fonts
-    font_top = ImageFont.truetype('impact.ttf', size=font_size_top)
-    font_bot = ImageFont.truetype('impact.ttf', size=font_size_bot)
+    font_top = ImageFont.truetype(str(ROOT / '_bafonts' / 'impact.ttf'), size=font_size_top)
+    font_bot = ImageFont.truetype(str(ROOT / '_bafonts' / 'impact.ttf'), size=font_size_bot)
 
     canvas = ImageDraw.Draw(template)
 
@@ -72,7 +76,7 @@ def make_meme(top_text='', bottom_text='', meme_dir='hmeme'):
 
     template.paste(watermark, box=(w - 128, h - 42), mask=watermark.getchannel(3))
 
-    template.save('tempememe.png')
+    template.save(ROOT / 'tempememe.png')
 
 
 def split_text(text: str, text_box_count: int) -> list:
